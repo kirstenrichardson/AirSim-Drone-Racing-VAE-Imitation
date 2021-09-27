@@ -1,0 +1,2 @@
+model_checkpoint_path: "cmvae_model_45.ckpt"
+all_model_checkpoint_paths: "cmvae_model_45.ckpt"

@@ -12,10 +12,10 @@ import racing_models.cmvae
 import racing_utils
 
 # DEFINE TESTING META PARAMETERS
-data_dir = '/home/rb/all_files/airsim_datasets/soccer_1k'
+data_dir = '/home/campus.ncl.ac.uk/b3024896/Projects/gym-donkeytrack/logs/donkey_50k'
 read_table = True
 latent_space_constraints = True
-weights_path = '/home/rb/all_files/model_outputs/cmvae_con/cmvae_model_40.ckpt'
+weights_path = '/home/campus.ncl.ac.uk/b3024896/Projects/gym-donkeytrack/logs/cmvae/run_2/cmvae_model_45.ckpt'
 
 n_z = 10
 img_res = 64
@@ -24,8 +24,8 @@ columns = 10
 rows = 10
 
 num_interp_z = 10
-idx_close = 0  #7
-idx_far = 1  #39
+idx_close = 204 # changed which images want to use as examples of near and far
+idx_far = 342
 
 z_range_mural = [-0.02, 0.02]
 z_num_mural = 11
@@ -43,15 +43,15 @@ os.environ['TF_FORCE_GPU_ALLOW_GROWTH'] = 'true'
 images_np, raw_table = racing_utils.dataset_utils.create_test_dataset_csv(data_dir, img_res, read_table=read_table)
 print('Done with dataset')
 
-images_np = images_np[:1000,:]
+images_np = images_np[:1000,:] 
 if read_table is True:
     raw_table = raw_table[:1000,:]
 
 # create model
 if latent_space_constraints is True:
-    model = racing_models.cmvae.CmvaeDirect(n_z=n_z, gate_dim=4, res=img_res, trainable_model=True)
+    model = racing_models.cmvae.CmvaeDirect(n_z=n_z, gate_dim=3, res=img_res, trainable_model=True) # changed gate_dim from 4 to 3
 else:
-    model = racing_models.cmvae.Cmvae(n_z=n_z, gate_dim=4, res=img_res, trainable_model=True)
+    model = racing_models.cmvae.Cmvae(n_z=n_z, gate_dim=3, res=img_res, trainable_model=True) # changed gate_dim from 4 to 3
 
 model.load_weights(weights_path)
 
@@ -74,17 +74,20 @@ if read_table is True:
 
 # show some reconstruction figures
 fig = plt.figure(figsize=(20, 20))
+# create array of num_imgs_display indexes to use with random sampler rather than using index 0 to num_imgs_display so more variation
+imgs_to_use = np.random.choice(range(1000), num_imgs_display, replace=False)
 for i in range(1, num_imgs_display+1):
+    img_to_use = imgs_to_use[i-1]
     idx_orig = (i-1)*2+1
     fig.add_subplot(rows, columns, idx_orig)
-    img_display = racing_utils.dataset_utils.convert_bgr2rgb(images_np[i - 1, :])
+    img_display = racing_utils.dataset_utils.convert_bgr2rgb(images_np[img_to_use, :])
     plt.axis('off')
     plt.imshow(img_display)
     fig.add_subplot(rows, columns, idx_orig+1)
-    img_display = racing_utils.dataset_utils.convert_bgr2rgb(img_recon[i-1, :])
+    img_display = racing_utils.dataset_utils.convert_bgr2rgb(img_recon[img_to_use, :])
     plt.axis('off')
     plt.imshow(img_display)
-fig.savefig(os.path.join('/home/rb/Pictures', 'reconstruction_results.png'))
+fig.savefig(os.path.join('/home/campus.ncl.ac.uk/b3024896/Projects/gym-donkeytrack/logs/cmvae/run_2/', 'reconstruction_results.png'))
 plt.show()
 
 # show interpolation btw two images in latent space
@@ -108,13 +111,13 @@ results = np.concatenate((indices, gate_recon_interp), axis=1)
 print('Img index | Predictions: = \n{}'.format(results))
 
 
-fig, axs = plt.subplots(1, 4, tight_layout=True)
+fig, axs = plt.subplots(1, 3, tight_layout=True)
 axs[0].plot(np.arange(gate_recon_interp.shape[0]), gate_recon_interp[:, 0], 'b-', label='r')
-axs[1].plot(np.arange(gate_recon_interp.shape[0]), gate_recon_interp[:, 1]*180/np.pi, 'b-', label=r'$\theta$')
-axs[2].plot(np.arange(gate_recon_interp.shape[0]), gate_recon_interp[:, 2]*180/np.pi, 'b-', label=r'$\phi$')
-axs[3].plot(np.arange(gate_recon_interp.shape[0]), gate_recon_interp[:, 3]*180/np.pi, 'b-', label=r'$\psi$')
+#axs[1].plot(np.arange(gate_recon_interp.shape[0]), gate_recon_interp[:, 1]*180/np.pi, 'b-', label=r'$\theta$')
+axs[1].plot(np.arange(gate_recon_interp.shape[0]), gate_recon_interp[:, 1]*180/np.pi, 'b-', label=r'$\phi$') # changed indexing accordingly
+axs[2].plot(np.arange(gate_recon_interp.shape[0]), gate_recon_interp[:, 2]*180/np.pi, 'b-', label=r'$\psi$')
 
-for idx in range(4):
+for idx in range(3): # changed range from 4 to 3
     # axs[idx].grid()
     y_ticks_array = gate_recon_interp[:, idx][np.array([0, gate_recon_interp[:, idx].shape[0]-1])]
     y_ticks_array = np.around(y_ticks_array, decimals=1)
@@ -125,14 +128,16 @@ for idx in range(4):
     axs[idx].set_xticklabels((r'$I_a$', r'$I_b$'))
 
 axs[0].set_title(r'$r$')
-axs[1].set_title(r'$\theta$')
-axs[2].set_title(r'$\phi$')
-axs[3].set_title(r'$\psi$')
+#axs[1].set_title(r'$\theta$')
+axs[1].set_title(r'$\phi$')
+axs[2].set_title(r'$\psi$') # chnaged indexing accordingly
 
 axs[0].set_ylabel('[meter]')
+#axs[1].set_ylabel(r'[deg]')
 axs[1].set_ylabel(r'[deg]')
-axs[2].set_ylabel(r'[deg]')
-axs[3].set_ylabel(r'[deg]')
+axs[2].set_ylabel(r'[deg]') # changed indexing accordingly
+
+fig.savefig(os.path.join('/home/campus.ncl.ac.uk/b3024896/Projects/gym-donkeytrack/logs/cmvae/run_2/', 'gate_stats_interpolation_results.png'))
 
 # plot the interpolated images
 fig2 = plt.figure(figsize=(96, 96))
@@ -151,7 +156,7 @@ fig2.add_subplot(rows, columns, num_interp_z + 2)
 img_display = racing_utils.dataset_utils.convert_bgr2rgb(images_np[idx_far, :])
 plt.axis('off')
 plt.imshow(img_display)
-fig2.savefig(os.path.join('/home/rb/Pictures', 'reconstruction_interpolation_results.png'))
+fig2.savefig(os.path.join('/home/campus.ncl.ac.uk/b3024896/Projects/gym-donkeytrack/logs/cmvae/run_2/', 'reconstruction_interpolation_results.png'))
 plt.show()
 
 # new plot traveling through latent space
@@ -162,13 +167,13 @@ z_values = racing_utils.geom_utils.interp_vector(z_range_mural[0], z_range_mural
 for i in range(1, z_num_mural*n_z + 1):
     fig3.add_subplot(rows, columns, i)
     z = np.zeros((1, n_z)).astype(np.float32)
-    z[0, (i-1)/columns] = z_values[i%columns-1]
-    # print (z)
+    z[0, int((i-1)/columns)] = z_values[i%columns-1] # changed column index of z from / to %, think it was possibly a typo 
     img_recon_interp, gate_recon_interp = model.decode(z, mode=0)
     img_recon_interp = img_recon_interp.numpy()
     img_recon_interp = ((img_recon_interp[0, :] + 1.0) / 2.0 * 255.0).astype(np.uint8)
     img_display = racing_utils.dataset_utils.convert_bgr2rgb(img_recon_interp)
     plt.axis('off')
     plt.imshow(img_display)
-fig3.savefig(os.path.join('/home/rb/Pictures', 'z_mural.png'))
+fig3.savefig(os.path.join('/home/campus.ncl.ac.uk/b3024896/Projects/gym-donkeytrack/logs/cmvae/run_2/', 'z_mural.png'))
 plt.show()
+

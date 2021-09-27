@@ -10,8 +10,8 @@ import racing_models.cmvae
 import racing_utils
 
 # DEFINE TRAINING META PARAMETERS
-data_dir = '/home/rb/all_files/airsim_datasets/soccer_1k'
-output_dir = '/home/rb/all_files/model_outputs/cmvae_con'
+data_dir = '/home/campus.ncl.ac.uk/b3024896/Projects/gym-donkeytrack/logs/donkey_50k'
+output_dir = '/home/campus.ncl.ac.uk/b3024896/Projects/gym-donkeytrack/logs/cmvae/run_2'
 batch_size = 32
 epochs = 50
 n_z = 10
@@ -150,9 +150,9 @@ print('Done with dataset')
 
 # create model
 if latent_space_constraints is True:
-    model = racing_models.cmvae.CmvaeDirect(n_z=n_z, gate_dim=4, res=img_res, trainable_model=True)
+    model = racing_models.cmvae.CmvaeDirect(n_z=n_z, gate_dim=3, res=img_res, trainable_model=True) # changed gate_dim from 4 to 3
 else:
-    model = racing_models.cmvae.Cmvae(n_z=n_z, gate_dim=4, res=img_res, trainable_model=True)
+    model = racing_models.cmvae.Cmvae(n_z=n_z, gate_dim=3, res=img_res, trainable_model=True) # changed gate_sim from 4 to 3
 
 # create optimizer
 optimizer = tf.keras.optimizers.Adam(lr=learning_rate)

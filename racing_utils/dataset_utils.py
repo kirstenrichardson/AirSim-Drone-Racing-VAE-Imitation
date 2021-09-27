@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import tensorflow as tf
 import random
 import os
-import matplotlib.pyplot as plt
+import pandas as pd
 import glob
 from PIL import Image
 import cv2
@@ -63,50 +63,50 @@ def de_normalize_v(v):
 
 def normalize_gate(pose):
     # normalization of velocities from whatever to [-1, 1] range
-    r_range = [0.1, 20]
+    r_range = [0.1, 30] 
     cam_fov = 90*0.85  # in degrees -- needs to be a bit smaller than 90 in fact because of cone vs. square
     alpha = cam_fov / 180.0 * np.pi / 2.0  # alpha is half of fov angle
-    theta_range = [-alpha, alpha]
-    psi_range = [np.pi / 2 - alpha, np.pi / 2 + alpha]
+    #theta_range = [-alpha, alpha]
+    psi_range = [-90, 90] # changed from [np.pi / 2 - alpha, np.pi / 2 + alpha]
     eps = 0.0
-    phi_rel_range = [-np.pi + eps, 0 - eps]
+    phi_rel_range = [0, 90] # changed from [-np.pi + eps, 0 - eps]
     if len(pose.shape) == 1:
         # means that it's a 1D vector of velocities
         pose[0] = 2.0 * (pose[0] - r_range[0]) / (r_range[1] - r_range[0]) - 1.0
-        pose[1] = 2.0 * (pose[1] - theta_range[0]) / (theta_range[1] - theta_range[0]) - 1.0
-        pose[2] = 2.0 * (pose[2] - psi_range[0]) / (psi_range[1] - psi_range[0]) - 1.0
-        pose[3] = 2.0 * (pose[3] - phi_rel_range[0]) / (phi_rel_range[1] - phi_rel_range[0]) - 1.0
+        #pose[1] = 2.0 * (pose[1] - theta_range[0]) / (theta_range[1] - theta_range[0]) - 1.0
+        pose[1] = 2.0 * (pose[1] - psi_range[0]) / (psi_range[1] - psi_range[0]) - 1.0
+        pose[2] = 2.0 * (pose[2] - phi_rel_range[0]) / (phi_rel_range[1] - phi_rel_range[0]) - 1.0 # changed indexing accordingly
     elif len(pose.shape) == 2:
         # means that it's a 2D vector of velocities
         pose[:, 0] = 2.0 * (pose[:, 0] - r_range[0]) / (r_range[1] - r_range[0]) - 1.0
-        pose[:, 1] = 2.0 * (pose[:, 1] - theta_range[0]) / (theta_range[1] - theta_range[0]) - 1.0
-        pose[:, 2] = 2.0 * (pose[:, 2] - psi_range[0]) / (psi_range[1] - psi_range[0]) - 1.0
-        pose[:, 3] = 2.0 * (pose[:, 3] - phi_rel_range[0]) / (phi_rel_range[1] - phi_rel_range[0]) - 1.0
+        #pose[:, 1] = 2.0 * (pose[:, 1] - theta_range[0]) / (theta_range[1] - theta_range[0]) - 1.0
+        pose[:, 1] = 2.0 * (pose[:, 1] - psi_range[0]) / (psi_range[1] - psi_range[0]) - 1.0
+        pose[:, 2] = 2.0 * (pose[:, 2] - phi_rel_range[0]) / (phi_rel_range[1] - phi_rel_range[0]) - 1.0 # changed indexing accordingly
     else:
         raise Exception('Error in data format of V shape: {}'.format(pose.shape))
     return pose
 
 def de_normalize_gate(pose):
     # normalization of velocities from [-1, 1] range to whatever
-    r_range = [0.1, 20]
+    r_range = [0.1, 30] 
     cam_fov = 90*0.85  # in degrees -- needs to be a bit smaller than 90 in fact because of cone vs. square
     alpha = cam_fov / 180.0 * np.pi / 2.0  # alpha is half of fov angle
-    theta_range = [-alpha, alpha]
-    psi_range = [np.pi / 2 - alpha, np.pi / 2 + alpha]
+    #theta_range = [-alpha, alpha]
+    psi_range = [-90, 90] # changed from [np.pi / 2 - alpha, np.pi / 2 + alpha]
     eps = 0.0
-    phi_rel_range = [-np.pi + eps, 0 - eps]
+    phi_rel_range = [0, 90] # changed from [-np.pi + eps, 0 - eps]
     if len(pose.shape) == 1:
         # means that it's a 1D vector of velocities
         pose[0] = (pose[0] + 1.0) / 2.0 * (r_range[1] - r_range[0]) + r_range[0]
-        pose[1] = (pose[1] + 1.0) / 2.0 * (theta_range[1] - theta_range[0]) + theta_range[0]
-        pose[2] = (pose[2] + 1.0) / 2.0 * (psi_range[1] - psi_range[0]) + psi_range[0]
-        pose[3] = (pose[3] + 1.0) / 2.0 * (phi_rel_range[1] - phi_rel_range[0]) + phi_rel_range[0]
+        #pose[1] = (pose[1] + 1.0) / 2.0 * (theta_range[1] - theta_range[0]) + theta_range[0]
+        pose[1] = (pose[1] + 1.0) / 2.0 * (psi_range[1] - psi_range[0]) + psi_range[0]
+        pose[2] = (pose[2] + 1.0) / 2.0 * (phi_rel_range[1] - phi_rel_range[0]) + phi_rel_range[0]
     elif len(pose.shape) == 2:
         # means that it's a 2D vector of velocities
         pose[:, 0] = (pose[:, 0] + 1.0) / 2.0 * (r_range[1] - r_range[0]) + r_range[0]
-        pose[:, 1] = (pose[:, 1] + 1.0) / 2.0 * (theta_range[1] - theta_range[0]) + theta_range[0]
-        pose[:, 2] = (pose[:, 2] + 1.0) / 2.0 * (psi_range[1] - psi_range[0]) + psi_range[0]
-        pose[:, 3] = (pose[:, 3] + 1.0) / 2.0 * (phi_rel_range[1] - phi_rel_range[0]) + phi_rel_range[0]
+        #pose[:, 1] = (pose[:, 1] + 1.0) / 2.0 * (theta_range[1] - theta_range[0]) + theta_range[0]
+        pose[:, 1] = (pose[:, 1] + 1.0) / 2.0 * (psi_range[1] - psi_range[0]) + psi_range[0]
+        pose[:, 2] = (pose[:, 2] + 1.0) / 2.0 * (phi_rel_range[1] - phi_rel_range[0]) + phi_rel_range[0]
     else:
         raise Exception('Error in data format of V shape: {}'.format(pose.shape))
     return pose
@@ -143,7 +143,7 @@ def read_images(data_dir, res, max_size=None):
 
 def create_dataset_csv(data_dir, batch_size, res, max_size=None):
     print('Going to read file list')
-    files_list = glob.glob(os.path.join(data_dir, 'images/*.png'))
+    files_list = glob.glob(os.path.join(data_dir, '*.png')) # took out the preceding images dir
     print('Done. Starting sorting.')
     files_list.sort()  # make sure we're reading the images in order later
     print('Done. Before images_np init')
@@ -171,7 +171,7 @@ def create_dataset_csv(data_dir, batch_size, res, max_size=None):
 
     print('Going to read csv file.')
     # prepare gate R THETA PSI PHI as np array reading from a file
-    raw_table = np.loadtxt(data_dir + '/gate_training_data.csv', delimiter=' ')
+    raw_table = np.loadtxt(data_dir + '/target_data.csv', delimiter=',') # changed name of csv and delimiter from space to comma
     raw_table = raw_table[:size_data, :]
 
     # sanity check
@@ -217,7 +217,7 @@ def create_unsup_dataset_multiple_sources(data_dir_list, batch_size, res):
 def create_test_dataset_csv(data_dir, res, read_table=True):
     # prepare image dataset from a folder
     print('Going to read file list')
-    files_list = glob.glob(os.path.join(data_dir, 'images/*.png'))
+    files_list = glob.glob(os.path.join(data_dir, '*.png')) # took out the preceding images dir
     print('Done. Starting sorting.')
     files_list.sort()  # make sure we're reading the images in order later
     print('Done. Before images_np init')
@@ -237,7 +237,7 @@ def create_test_dataset_csv(data_dir, res, read_table=True):
         return images_np, None
 
     # prepare gate R THETA PSI PHI as np array reading from a file
-    raw_table = np.loadtxt(data_dir + '/gate_training_data.csv', delimiter=' ')
+    raw_table = np.loadtxt(data_dir + '/target_data.csv', delimiter=',') # changed name of csv file and delimiter from space to comma
     # sanity check
     if raw_table.shape[0] != images_np.shape[0]:
         raise Exception('Number of images ({}) different than number of entries in table ({}): '.format(images_np.shape[0], raw_table.shape[0]))
