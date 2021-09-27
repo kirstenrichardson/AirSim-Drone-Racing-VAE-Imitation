@@ -48,7 +48,7 @@ def calculate_gate_stats(predictions, poses):
 
     axs[0].set_ylabel('Error Density')
 
-    fig.savefig(os.path.join('/home/campus.ncl.ac.uk/b3024896/Projects/gym-donkeytrack/logs/cmvae/run_2/', 'gate_stats_error_histograms.png'))
+    fig.savefig(os.path.join('/home/campus.ncl.ac.uk/b3024896/Projects/gym-donkeytrack/logs/cmvae/run_1/', 'gate_stats_error_histograms.png'))
 
     plt.show()
 

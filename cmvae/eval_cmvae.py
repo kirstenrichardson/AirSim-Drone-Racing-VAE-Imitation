@@ -12,10 +12,10 @@ import racing_models.cmvae
 import racing_utils
 
 # DEFINE TESTING META PARAMETERS
-data_dir = '/home/campus.ncl.ac.uk/b3024896/Projects/gym-donkeytrack/logs/donkey_50k'
+data_dir = '/home/campus.ncl.ac.uk/b3024896/Projects/gym-donkeytrack/logs/donkey_10k'
 read_table = True
 latent_space_constraints = True
-weights_path = '/home/campus.ncl.ac.uk/b3024896/Projects/gym-donkeytrack/logs/cmvae/run_2/cmvae_model_45.ckpt'
+weights_path = '/home/campus.ncl.ac.uk/b3024896/Projects/gym-donkeytrack/logs/cmvae/run_1/cmvae_model_45.ckpt'
 
 n_z = 10
 img_res = 64
@@ -87,7 +87,7 @@ for i in range(1, num_imgs_display+1):
     img_display = racing_utils.dataset_utils.convert_bgr2rgb(img_recon[img_to_use, :])
     plt.axis('off')
     plt.imshow(img_display)
-fig.savefig(os.path.join('/home/campus.ncl.ac.uk/b3024896/Projects/gym-donkeytrack/logs/cmvae/run_2/', 'reconstruction_results.png'))
+fig.savefig(os.path.join('/home/campus.ncl.ac.uk/b3024896/Projects/gym-donkeytrack/logs/cmvae/run_1/', 'reconstruction_results.png'))
 plt.show()
 
 # show interpolation btw two images in latent space
@@ -137,7 +137,7 @@ axs[0].set_ylabel('[meter]')
 axs[1].set_ylabel(r'[deg]')
 axs[2].set_ylabel(r'[deg]') # changed indexing accordingly
 
-fig.savefig(os.path.join('/home/campus.ncl.ac.uk/b3024896/Projects/gym-donkeytrack/logs/cmvae/run_2/', 'gate_stats_interpolation_results.png'))
+fig.savefig(os.path.join('/home/campus.ncl.ac.uk/b3024896/Projects/gym-donkeytrack/logs/cmvae/run_1/', 'gate_stats_interpolation_results.png'))
 
 # plot the interpolated images
 fig2 = plt.figure(figsize=(96, 96))
@@ -156,7 +156,7 @@ fig2.add_subplot(rows, columns, num_interp_z + 2)
 img_display = racing_utils.dataset_utils.convert_bgr2rgb(images_np[idx_far, :])
 plt.axis('off')
 plt.imshow(img_display)
-fig2.savefig(os.path.join('/home/campus.ncl.ac.uk/b3024896/Projects/gym-donkeytrack/logs/cmvae/run_2/', 'reconstruction_interpolation_results.png'))
+fig2.savefig(os.path.join('/home/campus.ncl.ac.uk/b3024896/Projects/gym-donkeytrack/logs/cmvae/run_1/', 'reconstruction_interpolation_results.png'))
 plt.show()
 
 # new plot traveling through latent space
@@ -174,6 +174,6 @@ for i in range(1, z_num_mural*n_z + 1):
     img_display = racing_utils.dataset_utils.convert_bgr2rgb(img_recon_interp)
     plt.axis('off')
     plt.imshow(img_display)
-fig3.savefig(os.path.join('/home/campus.ncl.ac.uk/b3024896/Projects/gym-donkeytrack/logs/cmvae/run_2/', 'z_mural.png'))
+fig3.savefig(os.path.join('/home/campus.ncl.ac.uk/b3024896/Projects/gym-donkeytrack/logs/cmvae/run_1/', 'z_mural.png'))
 plt.show()
 
